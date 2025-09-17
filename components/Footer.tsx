@@ -16,6 +16,7 @@ export function Footer() {
             <h4>Company</h4>
             <Link href={routePaths.about}>About</Link>
             <Link href={routePaths.contact}>Contact</Link>
+              <Link href="/admin">Admin</Link>
           </div>
           <div>
             <h4>Legal</h4>

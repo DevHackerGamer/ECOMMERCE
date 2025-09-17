@@ -11,14 +11,14 @@ export interface Product {
 
 export const products: Product[] = [
   {
-    slug: 'air-jordan-1-chicago-2015',
-    name: 'Air Jordan 1 Retro High OG "Chicago"',
+    slug: 'airforce-1-low-retro-prm',
+    name: 'Air Force 1',
     brand: 'Nike',
     priceCents: 320000,
     colorway: 'Varsity Red/Black-White',
     releaseYear: 2015,
     description: 'Iconic Jordan 1 in the classic Chicago colorway.',
-    image: '/placeholder/jordan1-chicago.jpg'
+    image: "https://static.nike.com/a/images/c_limit,w_592,f_auto/t_product_v1/a80d1905-5296-4aa9-855a-1d617e3c98f6/AIR+FORCE+1+LOW+RETRO+PRM.png"
   },
   {
     slug: 'yeezy-350-v2-zebra',
@@ -28,7 +28,7 @@ export const products: Product[] = [
     colorway: 'White/Core Black/Red',
     releaseYear: 2017,
     description: 'Distinctive striped Primeknit pattern with red SPLY-350 branding.',
-    image: '/placeholder/yeezy-zebra.jpg'
+    image: '/airforce1.jpg'
   },
   {
     slug: 'dunk-low-panda',
@@ -38,7 +38,7 @@ export const products: Product[] = [
     colorway: 'White/Black',
     releaseYear: 2021,
     description: 'Versatile monochrome Dunk Low nicknamed the Panda.',
-    image: '/placeholder/dunk-panda.jpg'
+    image: '/airforce1.jpg'
   }
 ];
 
