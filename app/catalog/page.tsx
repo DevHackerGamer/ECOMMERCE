@@ -27,7 +27,7 @@ export default async function CatalogPage() {
               </div>
               <div style={{ fontSize: '.85rem', fontWeight: 600, lineHeight: 1.3 }}>{p.title}</div>
               <div style={{ fontSize: '.7rem', color: 'var(--color-text-dim)' }}>{p.brand}</div>
-              <div style={{ fontSize: '.75rem', marginTop: 4 }}>${(p.price || 0).toFixed(2)}</div>
+              <div style={{ fontSize: '.75rem', marginTop: 4 }}>R{(p.price || 0).toFixed(2)}</div>
             </Link>
           );
         })}

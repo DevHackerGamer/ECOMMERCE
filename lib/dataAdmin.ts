@@ -1,5 +1,6 @@
 import 'server-only';
 import { adminDb } from './firebaseAdmin';
+import { adminBucket } from './firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 
 export type Product = {
@@ -50,13 +51,15 @@ export async function adminGetProduct(id: string) {
 }
 
 export async function adminCreateProduct(p: Omit<Product, "id" | "createdAt">) {
-  const ref = await productsCol.add({ ...p, createdAt: FieldValue.serverTimestamp() });
+  const payload = normalizeImagesOnWrite(p);
+  const ref = await productsCol.add({ ...payload, createdAt: FieldValue.serverTimestamp() });
   return ref.id;
 }
 
 export async function adminUpdateProduct(id: string, p: Partial<Product>) {
   const ref = productsCol.doc(id);
-  await ref.update(p as any);
+  const payload = normalizeImagesOnWrite(p);
+  await ref.update(payload as any);
 }
 
 export async function adminDeleteProduct(id: string) {
@@ -78,4 +81,37 @@ export async function adminCreateOrder(o: Omit<Order, "id" | "createdAt" | "stat
 export async function adminUpdateOrder(id: string, o: Partial<Order>) {
   const ref = ordersCol.doc(id);
   await ref.update(o as any);
+}
+
+// --- Helpers ---
+function normalizeImagesOnWrite<T extends { images?: string[] }>(obj: T): T {
+  if (!obj?.images || obj.images.length === 0) return obj;
+  const bucket = adminBucket.name; // current bucket name
+  const out = { ...obj } as T;
+  out.images = obj.images.map((url) => rewriteToLocalIfSameBucket(url, bucket));
+  return out;
+}
+
+function rewriteToLocalIfSameBucket(url: string, bucket: string): string {
+  try {
+    // Already local proxy
+    if (url.startsWith('/api/media/')) return url;
+    // firebase v0 style: https://firebasestorage.googleapis.com/v0/b/<bucket>/o/<encodedKey>?...
+    const v0 = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/`;
+    if (url.startsWith(v0)) {
+      const after = url.slice(v0.length);
+      const encodedKey = after.split('?')[0];
+      const key = decodeURIComponent(encodedKey);
+      return `/api/media/${key}`;
+    }
+    // GCS JSON/static style: https://storage.googleapis.com/<bucket>/<key>
+    const gcs = `https://storage.googleapis.com/${bucket}/`;
+    if (url.startsWith(gcs)) {
+      const key = url.slice(gcs.length);
+      return `/api/media/${key}`;
+    }
+    return url;
+  } catch {
+    return url;
+  }
 }

@@ -1,6 +1,7 @@
 import 'server-only';
 import { getApps, initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
 
 function initializeFirebaseAdmin() {
   // Return existing app if already initialized
@@ -21,18 +22,22 @@ function initializeFirebaseAdmin() {
   // Handle escaped newlines in private key
   privateKey = privateKey.replace(/\\n/g, '\n');
 
-  return initializeApp({
+  const storageBucket = process.env.FIREBASE_STORAGE_BUCKET || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+  const app = initializeApp({
     credential: cert({
       projectId,
       clientEmail,
       privateKey,
     }),
     projectId,
+    storageBucket,
   });
+  return app;
 }
 
 const adminApp = initializeFirebaseAdmin();
 export const adminDb = getFirestore(adminApp);
+export const adminBucket = getStorage(adminApp).bucket();
 if (process.env.FIRESTORE_EMULATOR_HOST && adminDb) {
   // No explicit connectToEmulator API on admin SDK; honoring env var is sufficient.
 }

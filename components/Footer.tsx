@@ -9,7 +9,6 @@ export function Footer() {
           <div>
             <h4>Marketplace</h4>
             <Link href={routePaths.catalog}>Catalog</Link>
-            <Link href={routePaths.account}>Account</Link>
             <Link href={routePaths.cart}>Cart</Link>
           </div>
           <div>

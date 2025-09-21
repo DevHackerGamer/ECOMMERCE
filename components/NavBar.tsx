@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { routePaths } from '../lib/routes';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function NavBar() {
   const pathname = usePathname();
@@ -12,19 +12,25 @@ export function NavBar() {
     { href: routePaths.catalog, label: 'Catalog' },
     { href: routePaths.about, label: 'About' },
     { href: routePaths.contact, label: 'Contact' },
-    { href: routePaths.account, label: 'Account' },
     { href: routePaths.cart, label: 'Cart' }
   ];
 
   const closeMenu = () => setOpen(false);
+
+  // Toggle a body class so we can blur background content (works even if backdrop-filter isn't supported)
+  useEffect(() => {
+    if (open) document.body.classList.add('menu-open');
+    else document.body.classList.remove('menu-open');
+    return () => document.body.classList.remove('menu-open');
+  }, [open]);
 
   return (
     <header className="site-header">
       <div className="container">
         <nav className="primary-nav">
           {/* Desktop/Large screens: show brand logo */}
-          <Link href={routePaths.home} className="brand" aria-label="BigDawg home">
-            <Image src="/STORE_2.svg" alt="BigDawg" width={1200} height={300} priority className="brand-logo" />
+          <Link href={routePaths.home} className="brand" aria-label="BigDawg home" prefetch={false}>
+            <Image src="/STORE_2.svg" alt="BigDawg" width={1200} height={300} className="brand-logo" />
           </Link>
 
           {/* Desktop links */}
@@ -33,6 +39,7 @@ export function NavBar() {
               <Link
                 key={l.href}
                 href={l.href}
+                prefetch={false}
                 className={`link${pathname === l.href ? ' active' : ''}`}
                 aria-current={pathname === l.href ? 'page' : undefined}
               >{l.label}</Link>
@@ -59,6 +66,7 @@ export function NavBar() {
           <Link
             key="home"
             href={routePaths.home}
+            prefetch={false}
             className={`mobile-link${pathname === routePaths.home ? ' active' : ''}`}
             onClick={closeMenu}
             aria-current={pathname === routePaths.home ? 'page' : undefined}
@@ -68,6 +76,7 @@ export function NavBar() {
             <Link
               key={l.href}
               href={l.href}
+              prefetch={false}
               className={`mobile-link${pathname === l.href ? ' active' : ''}`}
               onClick={closeMenu}
               aria-current={pathname === l.href ? 'page' : undefined}

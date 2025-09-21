@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, DragEvent } from "react";
 
 type Product = {
   id?: string;
@@ -99,6 +99,56 @@ export default function AdminPage() {
     await loadData();
   }
 
+  // Image upload handlers
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  function onBrowseClick() {
+    fileInputRef.current?.click();
+  }
+
+  async function handleFiles(files: FileList | File[]) {
+    const arr = Array.from(files);
+    if (!arr.length) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      for (const f of arr) fd.append('files', f);
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
+      if (!res.ok) throw new Error('Upload failed');
+      const j = await res.json();
+      const urls: string[] = j.urls || [];
+      setForm((prev) => ({ ...prev, images: [...(prev.images || []), ...urls] }));
+    } catch (err) {
+      console.error(err);
+      alert("Image upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function onDrop(e: DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer?.files?.length) {
+      void handleFiles(e.dataTransfer.files);
+    }
+  }
+
+  function onDragOver(e: DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }
+
+  function onDragLeave(e: DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }
+
   if (authed === false) {
     return (
       <div style={{ maxWidth: 420, margin: "2rem auto" }}>
@@ -137,7 +187,53 @@ export default function AdminPage() {
             <option value="available">available</option>
             <option value="sold_out">sold_out</option>
           </select>
-          <input placeholder="Image URLs (comma separated)" value={(form.images || []).join(",")} onChange={(e) => setForm({ ...form, images: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} />
+          {/* Image Uploader */}
+          <div
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            style={{
+              padding: "1rem",
+              border: "2px dashed #ccc",
+              borderColor: isDragging ? "#2563eb" : "#ccc",
+              borderRadius: 8,
+              background: isDragging ? "#f0f6ff" : "transparent",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: ".75rem", flexWrap: "wrap" }}>
+              <div style={{ fontSize: ".9rem" }}>
+                Drag & drop product images here, or
+                <button type="button" onClick={onBrowseClick} style={{ marginLeft: 8 }}>browse</button>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => e.target.files && handleFiles(e.target.files)}
+                style={{ display: "none" }}
+              />
+              {uploading && <span style={{ fontSize: ".85rem" }}>Uploading…</span>}
+            </div>
+            {(form.images?.length || 0) > 0 && (
+              <div style={{ marginTop: ".75rem", display: "flex", gap: ".5rem", flexWrap: "wrap" }}>
+                {(form.images || []).map((url, idx) => (
+                  <div key={idx} style={{ position: "relative" }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt="preview" style={{ width: 72, height: 72, objectFit: "cover", borderRadius: 6, border: "1px solid #e5e7eb" }} />
+                    <button
+                      type="button"
+                      onClick={() => setForm((prev) => ({ ...prev, images: (prev.images || []).filter((_, i) => i !== idx) }))}
+                      style={{ position: "absolute", top: -6, right: -6, background: "#fff", border: "1px solid #ddd", borderRadius: 999, width: 22, height: 22, lineHeight: "20px", textAlign: "center", cursor: "pointer" }}
+                      title="Remove"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <div style={{ display: "flex", gap: ".5rem" }}>
             <button type="submit">{form.id ? "Update" : "Create"} Product</button>
             {form.id && (
