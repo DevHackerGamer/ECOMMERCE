@@ -6,6 +6,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 export type Product = {
   id?: string;
   title: string;
+  titleLower?: string;
   brand?: string;
   price: number;
   sizesAvailable?: string[];
@@ -36,10 +37,36 @@ export type Order = {
 
 const productsCol = adminDb.collection("products");
 const ordersCol = adminDb.collection("orders");
+const promotionsCol = adminDb.collection("promotions");
+
+export type Promotion = {
+  id?: string;
+  title: string;
+  description?: string;
+  active: boolean;
+  bannerImage?: string;
+  productIds: string[];
+  createdAt?: any;
+};
 
 // PRODUCT CRUD - Server-side admin operations only
 export async function adminListProducts() {
   const snap = await productsCol.get();
+  return snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Product[];
+}
+
+export async function adminQueryProducts(opts?: { q?: string; limit?: number }) {
+  const limitN = Math.min(Math.max(opts?.limit ?? 25, 1), 100);
+  let qref: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = productsCol;
+  if (opts?.q) {
+    // Case-insensitive prefix search on lowercase title field
+    const q = opts.q.toLowerCase();
+    qref = qref.orderBy('titleLower').startAt(q).endAt(q + '\uf8ff');
+  } else {
+    qref = qref.orderBy('createdAt', 'desc');
+  }
+  qref = qref.limit(limitN);
+  const snap = await qref.get();
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Product[];
 }
 
@@ -52,14 +79,23 @@ export async function adminGetProduct(id: string) {
 
 export async function adminCreateProduct(p: Omit<Product, "id" | "createdAt">) {
   const payload = normalizeImagesOnWrite(p);
-  const ref = await productsCol.add({ ...payload, createdAt: FieldValue.serverTimestamp() });
+  const doc = {
+    ...payload,
+    titleLower: (p.title ?? '').toLowerCase(),
+    createdAt: FieldValue.serverTimestamp(),
+  };
+  const ref = await productsCol.add(doc as any);
   return ref.id;
 }
 
 export async function adminUpdateProduct(id: string, p: Partial<Product>) {
   const ref = productsCol.doc(id);
   const payload = normalizeImagesOnWrite(p);
-  await ref.update(payload as any);
+  const update: any = { ...payload };
+  if (p.title !== undefined) {
+    update.titleLower = (p.title ?? '').toLowerCase();
+  }
+  await ref.update(update);
 }
 
 export async function adminDeleteProduct(id: string) {
@@ -81,6 +117,53 @@ export async function adminCreateOrder(o: Omit<Order, "id" | "createdAt" | "stat
 export async function adminUpdateOrder(id: string, o: Partial<Order>) {
   const ref = ordersCol.doc(id);
   await ref.update(o as any);
+}
+
+// PROMOTIONS CRUD - Server-side admin operations only
+export async function adminListPromotions() {
+  const snap = await promotionsCol.get();
+  return snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Promotion[];
+}
+
+export async function adminGetPromotion(id: string) {
+  const ref = promotionsCol.doc(id);
+  const snap = await ref.get();
+  if (!snap.exists) return null;
+  return { id: snap.id, ...(snap.data() as any) } as Promotion;
+}
+
+export async function adminCreatePromotion(p: Omit<Promotion, 'id' | 'createdAt'>) {
+  const payload = normalizeImagesOnWrite({ ...p, images: p.bannerImage ? [p.bannerImage] : [] });
+  const docData: any = { ...payload, createdAt: FieldValue.serverTimestamp() };
+  // Remove helper array and drop falsey banner values
+  delete docData.images;
+  if (!docData.bannerImage || String(docData.bannerImage).trim() === '') {
+    delete docData.bannerImage;
+  }
+  const ref = await promotionsCol.add(docData);
+  return ref.id;
+}
+
+export async function adminUpdatePromotion(id: string, p: Partial<Promotion>) {
+  const withImageArray = { ...p, images: p.bannerImage ? [p.bannerImage] : undefined } as any;
+  const payload = normalizeImagesOnWrite(withImageArray);
+  const bannerCandidate = payload.images ? payload.images[0] : p.bannerImage;
+  const { images, ...rest } = payload as any;
+  // Ensure we don't carry raw bannerImage from rest; we'll control its update explicitly
+  delete (rest as any).bannerImage;
+  const ref = promotionsCol.doc(id);
+  // Determine banner update
+  let bannerUpdate: any = undefined;
+  if (bannerCandidate !== undefined) {
+    const s = typeof bannerCandidate === 'string' ? bannerCandidate.trim() : bannerCandidate;
+    bannerUpdate = s === '' ? FieldValue.delete() : bannerCandidate;
+  }
+  await ref.update({ ...rest, ...(bannerUpdate !== undefined ? { bannerImage: bannerUpdate } : {}) });
+}
+
+export async function adminDeletePromotion(id: string) {
+  const ref = promotionsCol.doc(id);
+  await ref.delete();
 }
 
 // --- Helpers ---

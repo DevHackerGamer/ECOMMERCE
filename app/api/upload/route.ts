@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAdminRequest } from '../../../lib/adminAuth';
 import { adminBucket } from '../../../lib/firebaseAdmin';
-import crypto from 'node:crypto';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   if (!isAdminRequest(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const url = new URL(req.url);
+  const folder = (url.searchParams.get('folder') || 'products').replace(/[^a-zA-Z0-9_\/-]/g, '').replace(/^[./]+/, '');
 
   const formData = await req.formData();
   const files = formData.getAll('files');
@@ -23,7 +25,7 @@ export async function POST(req: NextRequest) {
       const buffer = Buffer.from(arrayBuffer);
       const contentType = f.type || 'application/octet-stream';
       const filename = f.name || 'upload';
-      const key = `products/${Date.now()}-${Math.random().toString(36).slice(2)}-${filename}`;
+  const key = `${folder || 'products'}/${Date.now()}-${Math.random().toString(36).slice(2)}-${filename}`;
 
       const fileRef = adminBucket.file(key);
       await fileRef.save(buffer, {

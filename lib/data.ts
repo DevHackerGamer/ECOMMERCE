@@ -1,5 +1,5 @@
 import { db } from "./firebase";
-import { collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, serverTimestamp, query, where } from "firebase/firestore";
 import { products as sampleProducts } from "./products";
 
 export type Product = {
@@ -35,6 +35,17 @@ export type Order = {
 
 const productsCol = collection(db, "products");
 const ordersCol = collection(db, "orders");
+const promotionsCol = collection(db, "promotions");
+
+export type Promotion = {
+  id?: string;
+  title: string;
+  description?: string;
+  active: boolean;
+  bannerImage?: string; // single image URL
+  productIds: string[];
+  createdAt?: any;
+};
 
 export async function listProducts() {
   try {
@@ -111,4 +122,46 @@ export async function createOrder(o: Omit<Order, "id" | "createdAt" | "status">)
 export async function updateOrder(id: string, o: Partial<Order>) {
   const ref = doc(db, "orders", id);
   await updateDoc(ref, o as any);
+}
+
+// --- Promotions (public) ---
+export async function listPromotions(options?: { includeInactive?: boolean }) {
+  try {
+    let snap;
+    if (options?.includeInactive) {
+      snap = await getDocs(promotionsCol);
+    } else {
+      const q = query(promotionsCol, where("active", "==", true));
+      snap = await getDocs(q);
+    }
+    return snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Promotion[];
+  } catch {
+    return [] as Promotion[];
+  }
+}
+
+export async function getPromotion(id: string) {
+  try {
+    const ref = doc(db, "promotions", id);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return null;
+    return { id: snap.id, ...(snap.data() as any) } as Promotion;
+  } catch {
+    return null;
+  }
+}
+
+export async function createPromotion(p: Omit<Promotion, "id" | "createdAt">) {
+  const ref = await addDoc(promotionsCol, { ...p, createdAt: serverTimestamp() });
+  return ref.id;
+}
+
+export async function updatePromotion(id: string, p: Partial<Promotion>) {
+  const ref = doc(db, "promotions", id);
+  await updateDoc(ref, p as any);
+}
+
+export async function deletePromotion(id: string) {
+  const ref = doc(db, "promotions", id);
+  await deleteDoc(ref);
 }
