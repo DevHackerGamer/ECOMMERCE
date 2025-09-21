@@ -15,7 +15,7 @@ export default async function CatalogPage() {
         {products.map((p: any) => {
           const src = p.images?.[0] || '/airforce1.jpg';
           return (
-            <Link key={p.id} href={`/product/${p.id}`} className="card" style={{ textDecoration: 'none' }}>
+            <Link key={p.id} href={`/product/${p.id}`} className="card" style={{ textDecoration: 'none' }} prefetch={false}>
               <div style={{ position: 'relative', background: '#f0f0f0', aspectRatio: '1/1', borderRadius: 8, marginBottom: 8, overflow: 'hidden' }}>
                 <Image
                   src={src}
