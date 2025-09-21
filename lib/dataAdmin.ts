@@ -125,6 +125,11 @@ export async function adminListPromotions() {
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Promotion[];
 }
 
+export async function adminListActivePromotions() {
+  const snap = await promotionsCol.where('active', '==', true).get();
+  return snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Promotion[];
+}
+
 export async function adminGetPromotion(id: string) {
   const ref = promotionsCol.doc(id);
   const snap = await ref.get();
@@ -164,6 +169,21 @@ export async function adminUpdatePromotion(id: string, p: Partial<Promotion>) {
 export async function adminDeletePromotion(id: string) {
   const ref = promotionsCol.doc(id);
   await ref.delete();
+}
+
+// Helper: fetch products by IDs (chunked for 'in' query limit of 10)
+export async function adminGetProductsByIds(ids: string[]) {
+  if (!ids || ids.length === 0) return [] as Product[];
+  const out: Product[] = [];
+  for (let i = 0; i < ids.length; i += 10) {
+    const slice = ids.slice(i, i + 10);
+    const snap = await productsCol.where('__name__', 'in', slice).get();
+    out.push(...snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as Product[]);
+  }
+  // Preserve original order roughly by ids array
+  const index = new Map(ids.map((id, i) => [id, i] as const));
+  out.sort((a, b) => (index.get(a.id!) ?? 0) - (index.get(b.id!) ?? 0));
+  return out;
 }
 
 // --- Helpers ---

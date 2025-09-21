@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listPromotions } from "../../../lib/data";
-import { adminCreatePromotion, adminListPromotions } from "../../../lib/dataAdmin";
+import { adminCreatePromotion, adminListPromotions, adminListActivePromotions } from "../../../lib/dataAdmin";
 import { isAdminRequest } from "../../../lib/adminAuth";
 
 export async function GET(req: NextRequest) {
@@ -8,7 +8,8 @@ export async function GET(req: NextRequest) {
     const items = await adminListPromotions();
     return NextResponse.json(items);
   } else {
-    const items = await listPromotions();
+    // Use Admin SDK for public requests as well to prevent client SDK env issues on the server
+    const items = await adminListActivePromotions().catch(async () => await listPromotions());
     return NextResponse.json(items);
   }
 }

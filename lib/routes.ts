@@ -2,6 +2,7 @@ export const routePaths = {
   home: '/',
   catalog: '/catalog',
   product: (slug: string) => `/product/${slug}`,
+  promotion: (id: string) => `/promotions/${id}`,
   about: '/about',
   contact: '/contact',
   sell: '/sell',

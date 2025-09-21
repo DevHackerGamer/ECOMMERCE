@@ -1,35 +1,33 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { listPromotions } from '../lib/data';
+import { adminListActivePromotions } from '../lib/dataAdmin';
+import { adminGetProductsByIds } from '../lib/dataAdmin';
+import { routePaths } from '../lib/routes';
 
 export default async function HomePage() {
-  const promotions = await listPromotions().catch(() => []);
+  // Use Admin SDK on the server to reliably fetch from Firestore
+  const promotions = await adminListActivePromotions().catch(() => []);
+  // Build small product previews for each real promotion (up to 3 per promo)
+  const previewMap = new Map<string, any[]>();
+  if (promotions.length) {
+    const pairs = await Promise.all(
+      promotions.map(async (p: any) => {
+        const ids = Array.isArray(p.productIds) ? p.productIds.slice(0, 3) : [];
+        const items = ids.length ? await adminGetProductsByIds(ids) : [];
+        return [p.id, items] as const;
+      })
+    );
+    for (const [id, items] of pairs) previewMap.set(id, items);
+  }
+  // Fallback demo promotions so the section isn't empty on fresh installs
+  const fallbackPromotions = [
+    { id: 'demo-1', title: 'Featured Drops', description: 'Handpicked heat this week.', active: true, bannerImage: '/airforce1.jpg', productIds: Array.from({ length: 6 }, (_, i) => `d${i}`) },
+    { id: 'demo-2', title: 'Clean Classics', description: 'Timeless silhouettes in neutral tones.', active: true, bannerImage: '/airforce1.jpg', productIds: Array.from({ length: 4 }, (_, i) => `c${i}`) },
+    { id: 'demo-3', title: 'Street Essentials', description: 'Everyday pairs that go with anything.', active: true, bannerImage: '/airforce1.jpg', productIds: Array.from({ length: 5 }, (_, i) => `s${i}`) },
+  ];
+  const displayPromotions = (promotions?.length ? promotions : fallbackPromotions);
   return (
     <>
-      {promotions.length > 0 && (
-        <section className="promotions" style={{ marginBottom: '2rem' }}>
-          <h2 style={{ fontSize: '1.4rem', marginBottom: '.75rem' }}>Promotions</h2>
-          <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))' }}>
-            {promotions.map((p: any) => (
-              <div key={p.id} style={{ border: '1px solid #e5e7eb', borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
-                {p.bannerImage && (
-                  <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#f3f4f6' }}>
-                    <Image src={p.bannerImage} alt={p.title} fill sizes="(max-width: 768px) 90vw, 400px" style={{ objectFit: 'cover' }} />
-                  </div>
-                )}
-                <div style={{ padding: '0.75rem 1rem' }}>
-                  <div style={{ fontWeight: 700 }}>{p.title}</div>
-                  {p.description && <div style={{ fontSize: '.9rem', color: 'var(--color-text-dim)' }}>{p.description}</div>}
-                  <div style={{ fontSize: '.85rem', opacity: .8, marginTop: 6 }}>{(p.productIds?.length || 0)} products</div>
-                  <div style={{ marginTop: 8 }}>
-                    <Link href="/catalog" className="button">Shop</Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
       <section className="hero">
         <h1>Authentic. Curated.</h1>
         <p>
@@ -41,15 +39,44 @@ export default async function HomePage() {
           <Link href="/catalog" className="button">Browse Catalog</Link>
         </div>
       </section>
-      <section style={{marginTop:'3rem'}}>
-        <h2 style={{fontSize:'1.4rem', marginBottom:'.75rem'}}>What&apos;s Included Right Now</h2>
-        <ul style={{lineHeight:1.6, fontSize:'.9rem', color:'var(--color-text-dim)'}}>
-          <li>Static sample product data + dynamic product detail pages</li>
-          <li>App Router layout, navigation, footer, placeholder auth & legal routes</li>
-          <li>TypeScript strict config and route constants</li>
-          <li>Foundation ready for real inventory & checkout logic</li>
-        </ul>
-      </section>
+            {displayPromotions.length > 0 && (
+        <section className="promotions">
+          <h2 className="section-title">Promotions</h2>
+          <div className="promotions-grid">
+            {displayPromotions.map((p: any) => (
+              <div key={p.id} className="promo-card">
+                {p.bannerImage && (
+                  <div className="promo-media">
+                    <Image src={p.bannerImage} alt={p.title} fill sizes="(max-width: 768px) 90vw, 400px" style={{ objectFit: 'cover' }} />
+                  </div>
+                )}
+                <div className="promo-body">
+                  <div className="promo-title">{p.title}</div>
+                  {p.description && <div className="promo-desc">{p.description}</div>}
+                  {previewMap.get(p.id)?.length ? (
+                    <div className="promo-preview">
+                      {previewMap.get(p.id)!.slice(0, 3).map((prod: any) => {
+                        const src = prod.images?.[0] || '/airforce1.jpg';
+                        return (
+                          <div key={prod.id} className="promo-thumb">
+                            <Image src={src} alt={prod.title} fill sizes="52px" style={{ objectFit: 'cover' }} />
+                          </div>
+                        );
+                      })}
+                      {Array.isArray(p.productIds) && p.productIds.length > 3 && (
+                        <div className="promo-thumb more">+{p.productIds.length - 3}</div>
+                      )}
+                    </div>
+                  ) : null}
+                  <div className="promo-actions" style={{ marginTop: 8 }}>
+                    <Link href={routePaths.promotion(p.id)} className="button">Shop</Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </>
   );
 }
