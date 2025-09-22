@@ -406,9 +406,9 @@ footer.site-footer .fa { width: 18px; height: 18px; }
 
   transition: transform .25s ease, opacity .25s ease, filter .25s ease;
   will-change: transform, opacity;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  hyphens: auto;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: manual;
 }
 
 /* Extra specificity to beat any inherited link/text color on home grid */
@@ -436,6 +436,12 @@ footer.site-footer .fa { width: 18px; height: 18px; }
   color: transparent;
   -webkit-text-fill-color: transparent;
   font-weight: 800; /* slightly lighter for better fit */
+}
+
+/* Plain bold black last word for promos after the first */
+.promo-last-word {
+  color: #111;
+  font-weight: 800;
 }
 
 @media (max-width: 420px) {

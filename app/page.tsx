@@ -77,10 +77,11 @@ export default async function HomePage({
                         const parts = raw.split(/\s+/);
                         const last = parts.pop() || '';
                         const first = parts.join(' ');
+                        const lastClass = idx === 0 ? 'promo-last-word-grad' : 'promo-last-word';
                         return (
                           <>
                             {first && <span className="promo-first-words">{first}&nbsp;</span>}
-                            <span className="promo-last-word-grad">{last}</span>
+                            <span className={lastClass}>{last}</span>
                           </>
                         );
                       })()}
