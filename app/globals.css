@@ -297,7 +297,7 @@ footer.site-footer .fa { width: 18px; height: 18px; }
 }
 @media (max-width: 600px) {
   .promotions-grid.first-span > .promo-card:first-child .promo-title {
-    font-size: clamp(2rem, 8vw, 2.6rem);
+    font-size: clamp(1.65rem, 6.8vw, 2.1rem);
   }
   .promotions-grid.first-span > .promo-card:first-child .promo-body {
     padding-left: clamp(1rem, 6vw, 2rem);
@@ -310,7 +310,7 @@ footer.site-footer .fa { width: 18px; height: 18px; }
 
 /* Larger, bolder title when the first card spans full width */
 .promotions-grid.first-span > .promo-card:first-child .promo-title {
-  font-size: clamp(2.4rem, 6.5vw, 4.2rem);
+  font-size: clamp(2rem, 5.5vw, 3.5rem);
   letter-spacing: -0.025em;
   font-weight: 700; /* thinner than ultra-bold */
 }
@@ -396,7 +396,7 @@ footer.site-footer .fa { width: 18px; height: 18px; }
   font-family: var(--font-heading);
   font-weight: 800; /* bold heading */
   /* Make titles dominate the promo tile but avoid clipping on mobile */
-  font-size: clamp(2.2rem, 6.5vw, 4rem);
+  font-size: clamp(1.75rem, 5.2vw, 3.1rem);
   line-height: 1.1;
   letter-spacing: -0.025em;
 
@@ -422,6 +422,26 @@ footer.site-footer .fa { width: 18px; height: 18px; }
   -webkit-text-fill-color: initial !important;
   display: inline-block;
 }
+.promo-last-word-grad {
+  background: linear-gradient(90deg,#2563eb,#ef4444);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800; /* slightly lighter for better fit */
+}
+
+@media (max-width: 420px) {
+  .promo-last-word-grad {
+    font-weight: 800; /* keep emphasis but reduce thickness on very small screens */
+    letter-spacing: -0.01em; /* subtle tightening to help fit */
+  }
+}
+
+/* Make non-final words thinner for contrast */
+.promo-first-words {
+  font-weight: 600;
+}
 .promo-title-grad .accent {
   font-family: var(--font-accent);
   letter-spacing: .5px;
@@ -442,7 +462,7 @@ footer.site-footer .fa { width: 18px; height: 18px; }
   }
 }
 @media (max-width: 768px) {
-  .promo-card .promo-title { font-size: 1.75rem; }
+  .promo-card .promo-title { font-size: 1.55rem; }
 }
 .promo-card .promo-title::after { display: none; }
 .promo-card .promo-desc {
@@ -457,6 +477,16 @@ footer.site-footer .fa { width: 18px; height: 18px; }
   text-align: center;
   max-width: 92%;
   margin: .15rem auto 0;
+}
+
+/* Smaller titles for promos after the first, to fit within cards (especially on mobile) */
+.promotions-grid .promo-card:not(:first-child) .promo-title {
+  font-size: clamp(1.25rem, 4.3vw, 2.1rem);
+}
+@media (max-width: 600px) {
+  .promotions-grid .promo-card:not(:first-child) .promo-title {
+    font-size: clamp(1.05rem, 4.8vw, 1.5rem);
+  }
 }
 
 /* Slide-up description overlay on hover */
@@ -490,7 +520,7 @@ footer.site-footer .fa { width: 18px; height: 18px; }
 }
 
 @media (max-width: 420px) {
-  .promo-card .promo-title { font-size: 1.5rem; }
+  .promo-card .promo-title { font-size: 1.3rem; }
   .promo-card .promo-desc { font-size: .95rem; max-width: 94%; }
 }
 .promo-title { 
@@ -539,15 +569,7 @@ footer.site-footer .fa { width: 18px; height: 18px; }
 /* Promo tile hover: stronger upward shadow, no border-color change */
 .promo-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
 
-/* ——— Promo Hero (full-bleed sections) ——— */
-.full-bleed {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-  /* Use margin trick to achieve full-bleed without horizontal overflow */
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
-}
+/* ——— Promo Hero ——— */
 .promo-hero { position: relative; display: grid; align-items: end; min-height: clamp(380px, 62vh, 820px); overflow: hidden; }
 .promo-hero-media { position: absolute; inset: 0; z-index: 0; }
 .promo-hero::after {

@@ -56,10 +56,11 @@ export default async function HomePage({
         const gridClass = count === 1 ? 'single' : 'two-col';
         const firstSpans = count > 1 && isOdd; // first card spans full width
         return (
-          <section className="promotions full-bleed">
-            <div className={`promotions-grid ${gridClass} ${firstSpans ? 'first-span' : ''}`}>
-              {promos.map((p: any, idx: number) => (
-                <Link key={p.id} href={routePaths.promotion(p.id)} className="promo-card reveal-on-hover">
+          <section className="promotions">
+            <div className="container">
+              <div className={`promotions-grid ${gridClass} ${firstSpans ? 'first-span' : ''}`}>
+                {promos.map((p: any, idx: number) => (
+                  <Link key={p.id} href={routePaths.promotion(p.id)} className="promo-card reveal-on-hover">
                   {p.bannerImage && (
                     <div
                       className="promo-media"
@@ -70,15 +71,29 @@ export default async function HomePage({
                     />
                   )}
                   <div className="promo-body">
-                    <div className="promo-title"><span className="promo-title-grad">{p.title}</span></div>
+                    <div className="promo-title">
+                      {(() => {
+                        const raw = String(p.title || '').trim();
+                        const parts = raw.split(/\s+/);
+                        const last = parts.pop() || '';
+                        const first = parts.join(' ');
+                        return (
+                          <>
+                            {first && <span className="promo-first-words">{first}&nbsp;</span>}
+                            <span className="promo-last-word-grad">{last}</span>
+                          </>
+                        );
+                      })()}
+                    </div>
                   </div>
                   {p.description && (
                     <div className="promo-overlay">
                       <div className="promo-desc">{p.description}</div>
                     </div>
                   )}
-                </Link>
-              ))}
+                  </Link>
+                ))}
+              </div>
             </div>
           </section>
         );
