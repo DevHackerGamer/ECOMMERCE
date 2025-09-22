@@ -1,5 +1,5 @@
 import { db } from "./firebase";
-import { collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, serverTimestamp, query, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, serverTimestamp, query, where, orderBy, limit as fbLimit, startAfter } from "firebase/firestore";
 import { products as sampleProducts } from "./products";
 
 export type Product = {
@@ -63,6 +63,52 @@ export async function listProducts() {
       images: p.image ? [p.image] : [],
       createdAt: null,
     }));
+  }
+}
+
+// Simple client-side pagination helper using Firestore SDK (fallback when admin SDK isn't available)
+export async function listProductsPaged(opts?: { limit?: number; page?: number }) {
+  const limitN = Math.min(Math.max(opts?.limit ?? 10, 1), 50);
+  const pageN = Math.max(Math.floor(opts?.page ?? 1), 1);
+  try {
+    // For client SDK, we don't have offset, so we page by iterating cursors
+    let cursor: any = undefined;
+    let fetched: any[] = [];
+    for (let p = 1; p <= pageN; p++) {
+      const q = cursor
+        ? query(productsCol, orderBy('createdAt', 'desc'), startAfter(cursor), fbLimit(limitN))
+        : query(productsCol, orderBy('createdAt', 'desc'), fbLimit(limitN));
+      const snap = await getDocs(q);
+      const docs = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Product[];
+      if (p === pageN) fetched = docs;
+      cursor = snap.docs[snap.docs.length - 1];
+      if (snap.empty || snap.docs.length < limitN) {
+        // last page reached
+        return { items: fetched, page: pageN, limit: limitN, hasNext: false };
+      }
+    }
+    // We don't know if there's a next page without one more fetch, so do a small probe
+    if (cursor) {
+      const probeQ = query(productsCol, orderBy('createdAt', 'desc'), startAfter(cursor), fbLimit(1));
+      const probeSnap = await getDocs(probeQ);
+      return { items: fetched, page: pageN, limit: limitN, hasNext: !probeSnap.empty };
+    }
+    return { items: fetched, page: pageN, limit: limitN, hasNext: false };
+  } catch (err) {
+    // Fallback to sample data if Firestore not configured
+    const start = (pageN - 1) * limitN;
+    const items = sampleProducts.slice(start, start + limitN).map((p, i) => ({
+      id: `${start + i + 1}`,
+      title: p.name,
+      brand: p.brand,
+      price: (p.priceCents || 0) / 100,
+      sizesAvailable: [],
+      status: 'available',
+      images: p.image ? [p.image] : [],
+      createdAt: null,
+    }));
+    const hasNext = start + limitN < sampleProducts.length;
+    return { items, page: pageN, limit: limitN, hasNext };
   }
 }
 

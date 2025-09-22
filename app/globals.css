@@ -25,11 +25,14 @@ a { color: inherit; text-decoration: none; }
   --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
   --shadow-lg: 0 10px 32px rgba(0,0,0,0.1);
   --content-max-width: 1200px;
-  --header-h: 70px;
-  font-family: system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --header-h: 100px; /* increased to accommodate a huge mobile logo */
+  /* These CSS variables will be set by next/font on the <html> element; keep fallbacks here */
+  --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-heading: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-accent: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-body { background: var(--color-bg); color: var(--color-text); font-size: 16px; line-height: 1.45; }
+body { background: var(--color-bg); color: var(--color-text); font-size: 16px; line-height: 1.45; font-family: var(--font-body); }
 
 ::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-track { background: var(--color-bg); }
@@ -46,11 +49,33 @@ body { background: var(--color-bg); color: var(--color-text); font-size: 16px; l
 .card-placeholder .text-line.short { width: 60%; }
 
 header.site-header { position: sticky; top: 0; z-index: 1000; background: rgba(255,255,255,0.85); backdrop-filter: blur(1px); border-bottom: 1px solid var(--color-border); }
-nav.primary-nav { display: flex; align-items: center; gap: 1rem; padding: 0 .25rem; height: var(--header-h); }
+nav.primary-nav { display: flex; align-items: center; gap: 1rem; padding: 0 .25rem; height: var(--header-h); position: relative; overflow: visible; }
 
 /* Brand logo: visible only on >=1024px, scaled down to fit 70px bar */
 nav.primary-nav a.brand { display: none; align-items: center; height: 70px; }
 .brand-logo { height: 60px; width: auto; transform: scale(0.7); transform-origin: left center; }
+
+/* Mobile centered brand inside sticky header */
+.mobile-brand {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -55%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--header-h);
+  z-index: 1000; /* keep below menu toggle (1100) but above nav background */
+  pointer-events: none; /* avoid accidental taps navigating home on mobile */
+}
+.mobile-brand-logo {
+  /* Make it as large as possible without horizontal overflow */
+  height: clamp(160px, 28vh, 260px);
+  translate: 0px 15px;
+  max-width: 95vw;
+  width: auto;
+  opacity: 1;
+}
 
 /* Desktop nav links and visibility */
 .nav-links { display: none; gap: .25rem; margin-left: auto; }
@@ -135,7 +160,6 @@ nav.primary-nav a[aria-current="page"] {
   color: var(--color-text);
   text-decoration: underline;
   text-decoration-color: currentColor;
-}
 
 /* Mobile link hover/active to match behavior */
 .mobile-link {
@@ -143,13 +167,12 @@ nav.primary-nav a[aria-current="page"] {
   text-underline-offset: 4px;
   text-decoration-thickness: 2px;
 }
-.mobile-link:hover {
-  color: var(--color-text);
-  text-decoration: underline;
-}
-.mobile-link.active {
-  color: var(--color-text);
-  text-decoration: underline;
+    background: linear-gradient(90deg,
+      var(--color-bg) 0%,
+      rgba(255,255,255,0.92) 18%,
+      rgba(255,255,255,0.65) 36%,
+      rgba(255,255,255,0.28) 58%,
+      rgba(255,255,255,0.00) 74%);
   font-weight: 600;
 }
 
@@ -159,17 +182,15 @@ nav.primary-nav a[aria-current="page"] {
   .brand-logo { transform: scale(5) translate(-15px,5px); } /* logo is massive intrinsically; scale it down slightly on desktop */
   .nav-links { display: flex; }
   .menu-toggle { display: none; }
+  .mobile-brand { display: none; }
 }
 
-footer.site-footer { margin-top: 4rem; padding: 3rem 0 4rem; background: var(--color-bg-alt); border-top: 1px solid var(--color-border); }
 footer.site-footer .cols { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
-footer.site-footer h4 { font-size: .85rem; letter-spacing: .5px; text-transform: uppercase; font-weight: 600; margin-bottom: .75rem; color: var(--color-text-dim); }
-footer.site-footer a { display: block; font-size: .82rem; padding: .25rem 0; color: var(--color-text-dim); }
 footer.site-footer a:hover { color: var(--color-primary); }
-footer.site-footer .legal { margin-top: 2rem; font-size: .7rem; color: var(--color-text-dim); }
+footer.site-footer .legal { margin-top: 2rem; font-size: .7rem; color: var(--color-text-dim); justify-content: center; align-items: center; align-content: center;}
 
-.hero { padding: clamp(3rem, 12vh, 8rem) 0 4rem; text-align: center; }
-.hero h1 { font-size: clamp(2.5rem, 6vw, 4.2rem); line-height: 1.05; letter-spacing: -2px; background: linear-gradient(90deg,#2563eb,#ef4444); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero { padding: clamp(2vh, 2vh, 2vh) 0 2rem; text-align: center; }
+.hero h1 { font-family: var(--font-heading); font-size: clamp(2.5rem, 6vw, 4.2rem); line-height: 1.05; letter-spacing: -2px; background: linear-gradient(90deg,#2563eb,#ef4444); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .hero p { margin: 1.25rem auto 2rem; max-width: 640px; font-size: 1rem; color: var(--color-text-dim); }
 .hero .cta-row { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
 .button { --btn-bg: var(--color-primary); --btn-bg-hover: var(--color-primary-hover); background: var(--btn-bg); color: #fff; padding: .85rem 1.35rem; border-radius: var(--radius-md); font-weight: 600; font-size: .9rem; letter-spacing: .5px; display: inline-flex; align-items: center; gap: .5rem; box-shadow: var(--shadow-sm); transition: background .15s, transform .15s; }
@@ -179,13 +200,128 @@ footer.site-footer .legal { margin-top: 2rem; font-size: .7rem; color: var(--col
 main { min-height: 50vh; }
 
 .placeholder-box { background: var(--color-surface); border: 1px dashed var(--color-border); padding: 2rem; text-align: center; border-radius: var(--radius-md); color: var(--color-text-dim); }
+    /* Accent treatment when needed: wrap words with <em class="accent">word</em> */
 
 .muted { color: var(--color-text-dim); }
 
+/* ——— Footer (minimal & robust) ——— */
+footer.site-footer {
+  border-top: 1px solid var(--color-border);
+  background: #f1f5f9; /* a bit more grey than var(--color-bg-alt) */
+  margin-top: 2rem;
+}
+footer.site-footer .container { padding: 2rem 1.25rem; }
+footer.site-footer .cols {
+  display: grid;
+  /* three sections that wrap nicely on smaller screens */
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem 2.5rem;
+  align-items: start;
+}
+footer.site-footer .footer-section { display: grid; gap: .9rem; }
+footer.site-footer .cols h4 { font-size: .95rem; margin-bottom: .8rem; }
+footer.site-footer .cols a { display: block; font-size: .9rem; color: var(--color-text-dim); padding: .2rem 0; }
+footer.site-footer .cols a:hover { color: var(--color-text); }
+footer.site-footer .legal { margin-top: 1.5rem; font-size: .8rem; color: var(--color-text-dim); text-align: center; }
+@media (max-width: 600px) {
+  footer.site-footer .cols { grid-template-columns: 1fr; }
+}
+
+/* Footer forms */
+footer.site-footer .mini-form,
+footer.site-footer .subscribe-form { display: grid; gap: .9rem; }
+footer.site-footer .mini-form .row.two { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+footer.site-footer input,
+footer.site-footer textarea { width: 100%; border: 1px solid var(--color-border); border-radius: 8px; padding: .55rem .7rem; background: var(--color-surface); color: var(--color-text); }
+footer.site-footer textarea { resize: vertical; min-height: 84px; }
+footer.site-footer .subscribe-row { display: grid; grid-template-columns: 1fr auto; gap: .75rem; }
+@media (max-width: 600px) {
+  footer.site-footer .mini-form .row.two { grid-template-columns: 1fr; }
+  footer.site-footer .subscribe-row { grid-template-columns: 1fr; }
+}
+
+/* Social links */
+footer.site-footer .social-links { display: grid; gap: .6rem; }
+footer.site-footer .social { display: inline-flex; align-items: center; gap: .5rem; padding: .35rem 0; color: var(--color-text-dim); }
+footer.site-footer .social:hover { color: var(--color-text); }
+footer.site-footer .fa { width: 18px; height: 18px; }
+
+/* ——— Toasts & Confirm ——— */
+.toast-container {
+  position: fixed; inset: 0; display: grid; place-items: start center; pointer-events: none; padding-top: 18vh; z-index: 2000;
+}
+.toast-card {
+  min-width: 240px; max-width: 80vw; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md);
+  padding: .65rem .85rem; box-shadow: var(--shadow-md); pointer-events: auto; margin-bottom: .5rem; animation: toast-in .18s ease-out;
+}
+.toast-card.success { border-color: #86efac; }
+.toast-card.error { border-color: #fecaca; }
+.toast-message { font-size: .95rem; color: var(--color-text); }
+@keyframes toast-in { from { transform: translateY(-6px); opacity: .0; } to { transform: translateY(0); opacity: 1; } }
+
+.confirm-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.35); backdrop-filter: blur(2px); display: grid; place-items: center; z-index: 2100;
+}
+.confirm-card {
+  width: min(92vw, 420px); background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg); padding: 1rem; display: grid; gap: .75rem; animation: modal-in .18s ease-out;
+}
+.confirm-title { font-weight: 700; font-size: 1.05rem; }
+.confirm-message { color: var(--color-text-dim); }
+.confirm-actions { display: flex; gap: .5rem; justify-content: flex-end; }
+@keyframes modal-in { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
 /* ——— Promotions ——— */
-.promotions { margin: 2rem 0; }
-.promotions .section-title { font-size: 1.4rem; margin-bottom: .75rem; }
-.promotions-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.promotions { margin: 0 0; }
+.promotions .section-title { font-size: 1.4rem; margin: 0 0; }
+.promotions-grid { display: grid; gap: 0; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.promotions-grid.two-col { grid-template-columns: 1fr 1fr; }
+.promotions-grid.single { grid-template-columns: 1fr; }
+.promotions-grid.first-span > .promo-card:first-child {
+  grid-column: 1 / -1; /* take full width */
+}
+/* First full-width promo: reveal image earlier (shorter white blend) */
+.promotions-grid.first-span > .promo-card:first-child::after {
+  background: linear-gradient(90deg,
+    var(--color-bg) 0%,                  /* white under title */
+    var(--color-bg) 22%,                 /* smaller solid white region */
+    rgba(255,255,255,0.75) 32%,          /* quick fade */
+    rgba(255,255,255,0.40) 44%,
+    rgba(255,255,255,0.15) 52%,
+    rgba(255,255,255,0.00) 58%);         /* transparent earlier to show more image */
+}
+.promotions-grid.first-span > .promo-card:first-child .promo-body {
+  /* Align first card text with subsequent rows */
+  padding-left: clamp(1rem, 8vw, 6rem);
+  padding-right: clamp(1rem, 6vw, 8rem);
+}
+@media (max-width: 600px) {
+  .promotions-grid.first-span > .promo-card:first-child .promo-title {
+    font-size: clamp(2rem, 8vw, 2.6rem);
+  }
+  .promotions-grid.first-span > .promo-card:first-child .promo-body {
+    padding-left: clamp(1rem, 6vw, 2rem);
+    padding-right: 1rem;
+  }
+}
+@media (max-width: 600px) {
+  /* no special aspect ratio; height follows content */
+}
+
+/* Larger, bolder title when the first card spans full width */
+.promotions-grid.first-span > .promo-card:first-child .promo-title {
+  font-size: clamp(2.4rem, 6.5vw, 4.2rem);
+  letter-spacing: -0.025em;
+  font-weight: 700; /* thinner than ultra-bold */
+}
+.promotions-grid.first-span > .promo-card:first-child .promo-body {
+  bottom: 10px;
+}
+
+/* Ensure first full-width promo has enough height for larger titles */
+.promotions-grid.first-span > .promo-card:first-child {
+  min-height: clamp(18px, 22vw, 160px);
+}
 
 .promo-card { 
   border: 1px solid var(--color-border); 
@@ -196,14 +332,172 @@ main { min-height: 50vh; }
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 .promo-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: #d1d5db; }
-.promo-media { position: relative; width: 100%; aspect-ratio: 16 / 9; background: var(--color-surface); }
-.promo-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,.05)); pointer-events: none; }
-.promo-body { padding: .85rem 1rem; }
+.promo-card { position: relative; min-height: clamp(90px, 9vw, 140px); }
+.promo-media { 
+  position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; 
+  background: var(--color-surface);
+}
+.promo-media::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background-image: var(--promo-img);
+  background-size: cover;
+  background-position: center;
+  /* keep the shoe photo crisper and more visible */
+  background-attachment: scroll;
+  filter: blur(1.5px);
+  transform: scale(1.02);
+  transform-origin: center;
+}
+.promo-card::after {
+  content: "";
+  position: absolute; inset: 0;
+  /* White blend similar to promo page header: left → right */
+  background: linear-gradient(90deg,
+    var(--color-bg) 0%,
+    rgba(255,255,255,0.92) 18%,
+    rgba(255,255,255,0.65) 36%,
+    rgba(255,255,255,0.28) 58%,
+    rgba(255,255,255,0.00) 74%);
+  pointer-events: none;
+  z-index: 1;
+}
+.promo-media::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1; background: rgba(255,255,255,0.28); }
+/* image element no longer required for background; retain selector for safety if used elsewhere */
+.promo-media img { display: none; }
+.promo-body {
+  position: absolute; /* allow vertical centering within banner */
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0;
+  right: 0;
+  padding: .5rem .7rem .6rem;
+  z-index: 4; 
+  isolation: isolate;
+}
+/* Indent promo titles a bit from the left, consistent with the hero-like first tile (smaller offset) */
+.promotions-grid .promo-card .promo-body {
+  padding-left: clamp(1rem, 8vw, 6rem);
+  padding-right: clamp(.75rem, 4vw, 3rem);
+}
+@media (max-width: 600px) {
+  .promotions-grid .promo-card .promo-body {
+    padding-left: clamp(1rem, 6vw, 2rem);
+    padding-right: 1rem;
+  }
+}
+.promo-card .promo-title {
+  /* Solid black, thinner weight */
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: border-box !important;
+  color: #111 !important;
+  -webkit-text-fill-color: initial !important;
+  display: inline-block;
+  font-family: var(--font-heading);
+  font-weight: 800; /* bold heading */
+  /* Make titles dominate the promo tile but avoid clipping on mobile */
+  font-size: clamp(2.2rem, 6.5vw, 4rem);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+
+  transition: transform .25s ease, opacity .25s ease, filter .25s ease;
+  will-change: transform, opacity;
+}
+
+/* Extra specificity to beat any inherited link/text color on home grid */
+.promotions-grid .promo-card .promo-title {
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: border-box !important;
+  color: #111 !important;
+  -webkit-text-fill-color: initial !important;
+}
+
+/* Neutralize gradient span to plain black */
+.promo-title-grad {
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: border-box !important;
+  color: #111 !important;
+  -webkit-text-fill-color: initial !important;
+  display: inline-block;
+}
+.promo-title-grad .accent {
+  font-family: var(--font-accent);
+  letter-spacing: .5px;
+  display: inline-block;
+  transform: translateY(1px);
+}
+
+/* Fallback: if background-clip:text unsupported, keep brand color instead of black */
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .promo-card .promo-title,
+  .promotions-grid .promo-card .promo-title {
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: border-box !important;
+    -webkit-text-fill-color: initial !important;
+    color: #2563eb !important; /* brand blue as fallback */
+    text-shadow: none;
+  }
+}
+@media (max-width: 768px) {
+  .promo-card .promo-title { font-size: 1.75rem; }
+}
+.promo-card .promo-title::after { display: none; }
+.promo-card .promo-desc {
+  color: #fff;
+  /* text-shadow:
+    0 2px 8px rgba(0,0,0,.6),
+    0 1px 3px rgba(0,0,0,.85); */
+  font-size: clamp(.85rem, 1.6vw, 1rem);
+  
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+  max-width: 92%;
+  margin: .15rem auto 0;
+}
+
+/* Slide-up description overlay on hover */
+.promo-overlay {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: auto; /* only as tall as the content */
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  transform: translateY(100%);
+  transition: transform .28s ease;
+  will-change: transform;
+  display: grid;
+  place-items: start center; /* top-center */
+  padding: .8rem .9rem 1rem;
+  box-shadow: none; /* avoid shadow artifact before hover */
+  z-index: 5; /* above centered title */
+}
+.reveal-on-hover:hover .promo-overlay { 
+  transform: translateY(0);
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.35); /* only show shadow when visible */
+}
+.reveal-on-hover:hover .promo-title { transform: translateY(14px); opacity: 0; filter: blur(0.5px); }
+/* ensure overlay visually sits above title during hover for a cleaner exit */
+.reveal-on-hover:hover .promo-body { z-index: 2; }
+.promo-overlay .promo-desc {
+  color: #fff;
+  text-shadow:
+    0 2px 8px rgba(0,0,0,.6),
+    0 1px 3px rgba(0,0,0,.85);
+}
+
+@media (max-width: 420px) {
+  .promo-card .promo-title { font-size: 1.5rem; }
+  .promo-card .promo-desc { font-size: .95rem; max-width: 94%; }
+}
 .promo-title { 
-  font-weight: 800; 
+  font-weight: 900; 
   font-size: 1.05rem; 
   line-height: 1.25; 
-  letter-spacing: -0.2px; 
+  letter-spacing: -0.025em; 
   position: relative; 
   display: inline-block; 
 }
@@ -214,7 +508,7 @@ main { min-height: 50vh; }
   width: 38px;
   margin-top: 6px;
   border-radius: 999px;
-  background: linear-gradient(90deg,#2563eb,#ef4444);
+  /* background: linear-gradient(90deg,#2563eb,#ef4444); */
 }
 .promo-desc { font-size: .9rem; color: var(--color-text-dim); margin-top: 2px; }
 .promo-meta { font-size: .85rem; opacity: .8; margin-top: 6px; }
@@ -228,7 +522,7 @@ main { min-height: 50vh; }
 .promo-thumb.more { display: inline-flex; align-items: center; justify-content: center; background: var(--color-surface); color: var(--color-text-dim); font-size: .8rem; font-weight: 600; }
 
 /* ——— Product cards ——— */
-.card { 
+.card, .promo-card { 
   display: block;
   text-decoration: none;
   border: 1px solid var(--color-border);
@@ -238,9 +532,172 @@ main { min-height: 50vh; }
   box-shadow: var(--shadow-sm);
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
+/* Default card hover */
 .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: #d1d5db; }
+/* Square corners for promo tiles */
+.promo-card { border-radius: 0; border: 0; }
+/* Promo tile hover: stronger upward shadow, no border-color change */
+.promo-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+/* ——— Promo Hero (full-bleed sections) ——— */
+.full-bleed {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  /* Use margin trick to achieve full-bleed without horizontal overflow */
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+.promo-hero { position: relative; display: grid; align-items: end; min-height: clamp(380px, 62vh, 820px); overflow: hidden; }
+.promo-hero-media { position: absolute; inset: 0; z-index: 0; }
+.promo-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Soften the overlay to avoid obvious grey banding; keep focus near bottom */
+  background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,.35) 100%);
+  pointer-events: none;
+  z-index: 3;
+}
+.promo-hero-inner { position: relative; z-index: 2; width: 100%; max-width: var(--content-max-width); margin: 0 auto; padding: 1.25rem 1.25rem 2.25rem; }
+.promo-hero-title { color: #fff; font-weight: 800; font-size: clamp(1.75rem, 4vw, 2.75rem); line-height: 1.1; letter-spacing: -0.02em; }
+.promo-hero-title {
+  text-shadow:
+    0 4px 18px rgba(0,0,0,.7),
+    0 2px 6px rgba(0,0,0,.85),
+    0 0 1px rgba(0,0,0,.9);
+  font-weight: 900;
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  opacity: 0.05;
+}
+.promo-hero-desc { color: rgba(255,255,255,0.85); max-width: 62ch; margin-top: 6px; font-size: clamp(.95rem, 1.6vw, 1.05rem); }
+.promo-hero .button { margin-top: .9rem; }
 .card-media { position: relative; background: #f0f0f0; aspect-ratio: 1 / 1; }
 .card-body { padding: .6rem .75rem .8rem; }
 .card-title { font-size: .9rem; font-weight: 600; line-height: 1.3; }
 .card-sub { font-size: .72rem; color: var(--color-text-dim); margin-top: 2px; }
 .card-price { font-size: .8rem; margin-top: 6px; }
+
+/* ——— Reusable product grid ——— */
+.product-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+@media (max-width: 600px) {
+  /* Force at least two columns on small screens */
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ——— Promotion Detail Header ——— */
+.promo-detail-header {
+  display: grid;
+  gap: 1.25rem;
+  align-items: stretch;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 900px) {
+  .promo-detail-header {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  }
+}
+.promo-detail-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: .5rem 0;
+}
+.promo-detail-title {
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--color-text);
+  font-size: clamp(2.2rem, 7vw, 4rem);
+}
+.promo-detail-desc {
+  margin-top: .6rem;
+  color: var(--color-text-dim);
+  font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  max-width: 60ch;
+}
+.promo-detail-meta { margin-top: .8rem; }
+.promo-detail-media {
+  position: relative;
+  min-height: 280px;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+/* Hero variant: banner as blended background */
+.promo-detail-hero {
+  position: relative;
+  overflow: hidden;
+  /* More compact hero band height */
+  height: clamp(200px, 34vh, 380px);
+  display: grid;
+  align-items: center;
+}
+.promo-detail-hero-media { position: absolute; inset: 0; z-index: 0; }
+.promo-detail-hero-media::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background-image: var(--promo-hero-img);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  filter: blur(8px);
+  transform: scale(1.08);
+  transform-origin: center;
+}
+.promo-detail-hero-media::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background: rgba(255,255,255,0.24); /* subtle white veil to help title contrast */
+}
+/* Keep the focal point centered for varying aspect ratios */
+/* no img needed; background handles fixed behavior */
+/* Left-to-right blend: solid page bg on left → transparent → full image */
+.promo-detail-hero::before {
+  content: "";
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(90deg,
+    var(--color-bg) 0%,
+    rgba(255,255,255,0.96) 28%,
+    rgba(255,255,255,0.72) 52%,
+    rgba(255,255,255,0.38) 76%,
+    rgba(255,255,255,0.0) 92%);
+  pointer-events: none;
+}
+/* Subtle bottom fade to ground the text area */
+.promo-detail-hero::after {
+  content: "";
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(180deg, rgba(255,255,255,0) 70%, rgba(255,255,255,0.5) 100%);
+  pointer-events: none;
+}
+.promo-detail-hero-inner { position: relative; z-index: 2; padding: clamp(1rem, 4vh, 2rem) 0; }
+.promo-detail-hero .promo-detail-title {
+  /* Match home hero gradient */
+  /* background: linear-gradient(90deg,#2563eb,#ef4444); */
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  font-size: clamp(2.2rem, 6.2vw, 3.8rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-weight: 900;
+  text-shadow:
+    0 4px 16px rgba(0,0,0,.25),
+    0 2px 6px rgba(0,0,0,.25);
+}
+.promo-detail-hero .promo-detail-desc { color: var(--color-text-dim); font-size: clamp(1.05rem, 2.2vw, 1.25rem); max-width: 60ch; margin-top: .6rem; }
+.promo-detail-hero .promo-detail-meta { margin-top: .85rem; }
+
+@media (max-width: 600px) {
+  .promo-detail-hero { height: clamp(180px, 28vh, 260px); }
+  /* Slightly reduce blur/scale on mobile for clarity & perf (applied to ::before) */
+  .promo-media::before { filter: blur(4px); transform: scale(1.04); }
+}

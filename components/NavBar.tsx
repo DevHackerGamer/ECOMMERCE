@@ -33,6 +33,23 @@ export function NavBar() {
             <Image src="/STORE_2.svg" alt="BigDawg" width={1200} height={300} className="brand-logo" />
           </Link>
 
+          {/* Mobile: centered logo in sticky header */}
+          <Link
+            href={routePaths.home}
+            className="mobile-brand"
+            aria-label="BigDawg home"
+            prefetch={false}
+          >
+            <Image
+              src="/mobileLogo.png"
+              alt="BigDawg"
+              width={1000}
+              height={300}
+              className="mobile-brand-logo"
+              priority
+            />
+          </Link>
+
           {/* Desktop links */}
           <div className="nav-links">
             {links.map(l => (

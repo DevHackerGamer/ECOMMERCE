@@ -19,27 +19,27 @@ export default async function PromotionDetailPage({ params }: { params: Promise<
   const products = await adminGetProductsByIds(promo.productIds || []);
   return (
     <div style={{ padding: '2rem 0' }}>
-      <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr' }}>
-        <div className="promo-card" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr)', overflow: 'hidden' }}>
-          {promo.bannerImage && (
-            <div className="promo-media">
-              <Image src={promo.bannerImage} alt={promo.title} fill sizes="(max-width: 768px) 90vw, 800px" style={{ objectFit: 'cover' }} />
-            </div>
-          )}
-          <div className="promo-body">
-            <div className="promo-title" style={{ fontSize: '1.4rem' }}>{promo.title}</div>
-            {promo.description && <div className="promo-desc" style={{ marginTop: 4 }}>{promo.description}</div>}
-            <div className="promo-meta" style={{ marginTop: 8 }}><span className="chip">{products.length} products</span></div>
+      <section className="promo-detail-hero">
+        {promo.bannerImage && (
+          <div
+            className="promo-detail-hero-media"
+            style={{ ['--promo-hero-img' as any]: `url(${promo.bannerImage})` }}
+          />
+        )}
+        <div className="promo-detail-hero-inner container">
+          <div className="promo-detail-text">
+            <h1 className="promo-detail-title">{promo.title}</h1>
+            {promo.description && <p className="promo-detail-desc">{promo.description}</p>}
+            {/* <div className="promo-detail-meta"><span className="chip">{products.length} products</span></div> */}
           </div>
         </div>
-      </div>
+      </section>
 
-      <div style={{ marginTop: '1.25rem' }}>
-        <h2 style={{ fontSize: '1.2rem', marginBottom: '.75rem' }}>Products</h2>
+      <section className="container" style={{ marginTop: '1.25rem' }}>
         {products.length === 0 ? (
           <div className="placeholder-box">No products assigned to this promotion yet.</div>
         ) : (
-          <div style={{ display: 'grid', gap: '1.25rem', gridTemplateColumns: 'repeat(auto-fill, minmax(180px,1fr))' }}>
+          <div className="product-grid">
             {products.map((p: any) => {
               const src = p.images?.[0] || '/airforce1.jpg';
               return (
@@ -57,7 +57,7 @@ export default async function PromotionDetailPage({ params }: { params: Promise<
             })}
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }

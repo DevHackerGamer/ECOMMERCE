@@ -10,8 +10,8 @@ export default async function CatalogPage() {
   return (
     <div style={{ padding: '2.5rem 0' }}>
       <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Catalog</h1>
-      <p className="muted" style={{ marginBottom: '1.5rem' }}>Curated in-stock pairs. Click a sneaker to view its detail page.</p>
-      <div style={{ display: 'grid', gap: '1.25rem', gridTemplateColumns: 'repeat(auto-fill, minmax(180px,1fr))' }}>
+      {/* <p className="muted" style={{ marginBottom: '1.5rem' }}>Curated in-stock pairs. Click a sneaker to view its detail page.</p> */}
+  <div className="product-grid">
         {products.map((p: any) => {
           const src = p.images?.[0] || '/airforce1.jpg';
           return (

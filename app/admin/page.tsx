@@ -31,21 +31,23 @@ export default function AdminIndexPage() {
     }
   }
 
-  if (authed === null) return <div style={{ padding: '2rem' }}>Loading…</div>;
+  if (authed === null) return <div className="admin-container">Loading…</div>;
   if (authed) return null;
 
   return (
-    <div style={{ maxWidth: 420, margin: '2rem auto' }}>
-      <h1>Admin Login</h1>
-      <form onSubmit={login}>
+    <div className="admin-container" style={{ maxWidth: 480 }}>
+      <h1 className="admin-title">Admin Login</h1>
+      <form onSubmit={login} className="admin-form" style={{ maxWidth: 420 }}>
         <input
+          className="admin-input"
           type="password"
           placeholder="Admin password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          style={{ width: '100%', padding: '.6rem', marginBottom: '.75rem' }}
         />
-        <button type="submit" style={{ padding: '.6rem 1rem' }}>Log in</button>
+        <div className="admin-actions">
+          <button type="submit" className="admin-btn primary">Log in</button>
+        </div>
       </form>
     </div>
   );

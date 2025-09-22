@@ -55,18 +55,36 @@ export async function adminListProducts() {
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Product[];
 }
 
+// Paged listing using Firestore offset for simple numbered pagination on server
+export async function adminListProductsPaged(opts?: { limit?: number; page?: number }) {
+  const limitN = Math.min(Math.max(opts?.limit ?? 10, 1), 50);
+  const pageN = Math.max(Math.floor(opts?.page ?? 1), 1);
+  const offsetN = (pageN - 1) * limitN;
+  // Fetch one extra to determine if there is a next page
+  const q = productsCol.orderBy('createdAt', 'desc').offset(offsetN).limit(limitN + 1);
+  const snap = await q.get();
+  const docs = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Product[];
+  const hasNext = docs.length > limitN;
+  const items = hasNext ? docs.slice(0, limitN) : docs;
+  return { items, page: pageN, limit: limitN, hasNext };
+}
+
 export async function adminQueryProducts(opts?: { q?: string; limit?: number }) {
   const limitN = Math.min(Math.max(opts?.limit ?? 25, 1), 100);
-  let qref: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = productsCol;
+  // For search, prefer a reliable in-memory filter across title and brand to avoid index issues
   if (opts?.q) {
-    // Case-insensitive prefix search on lowercase title field
     const q = opts.q.toLowerCase();
-    qref = qref.orderBy('titleLower').startAt(q).endAt(q + '\uf8ff');
-  } else {
-    qref = qref.orderBy('createdAt', 'desc');
+    const snap = await productsCol.orderBy('createdAt', 'desc').limit(Math.min(limitN * 8, 200)).get();
+    const all = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Product[];
+    const filtered = all.filter((p) => {
+      const t = (p.title || '').toLowerCase();
+      const b = (p.brand || '').toLowerCase();
+      return t.includes(q) || b.includes(q);
+    });
+    return filtered.slice(0, limitN);
   }
-  qref = qref.limit(limitN);
-  const snap = await qref.get();
+  // Default listing
+  const snap = await productsCol.orderBy('createdAt', 'desc').limit(limitN).get();
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Product[];
 }
 

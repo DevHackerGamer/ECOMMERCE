@@ -39,14 +39,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push('/admin');
   }
 
-  if (!checked) return <div style={{ padding: '2rem' }}>Loading…</div>;
+  if (!checked) return <div className="admin-container">Loading…</div>;
   // When logged out, allow the /admin index route to render its own login UI
   if (authed === false) {
     if (pathname === '/admin') {
-      return <div style={{ padding: '2rem' }}>{children}</div>;
+      return <div className="admin-container">{children}</div>;
     }
     // For any other admin route, a redirect is scheduled; show a small placeholder
-    return <div style={{ padding: '2rem' }}>Redirecting to login…</div>;
+    return <div className="admin-container">Redirecting to login…</div>;
   }
 
   const tabs = [
@@ -56,17 +56,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div style={{ padding: '2rem', display: 'grid', gap: '1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>Admin</h1>
-        <button onClick={logout}>Log out</button>
+    <div className="admin-container">
+      <div className="admin-header">
+        <h1 className="admin-title">Admin</h1>
+        <button className="admin-logout" onClick={logout}>Log out</button>
       </div>
-      <div style={{ display: 'flex', gap: '.5rem', flexWrap: 'wrap' }}>
+      <div className="admin-tabs">
         {tabs.map(t => (
-          <Link key={t.href} href={t.href} className={`tab${pathname === t.href ? ' active' : ''}`} style={{ padding: '.4rem .7rem', border: '1px solid #e5e7eb', borderRadius: 6, background: pathname === t.href ? '#f3f4f6' : '#fff' }}>{t.label}</Link>
+          <Link
+            key={t.href}
+            href={t.href}
+            className={`admin-tab${pathname === t.href ? ' active' : ''}`}
+          >
+            {t.label}
+          </Link>
         ))}
       </div>
-      <div>
+      <div className="admin-section">
         {children}
       </div>
     </div>
