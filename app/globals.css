@@ -275,6 +275,7 @@ footer.site-footer .fa { width: 18px; height: 18px; }
 .promotions { margin: 0 0; }
 .promotions .section-title { font-size: 1.4rem; margin: 0 0; }
 .promotions-grid { display: grid; gap: 0; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.promotions-grid { align-items: stretch; }
 .promotions-grid.two-col { grid-template-columns: 1fr 1fr; }
 .promotions-grid.single { grid-template-columns: 1fr; }
 .promotions-grid.first-span > .promo-card:first-child {
@@ -297,7 +298,7 @@ footer.site-footer .fa { width: 18px; height: 18px; }
 }
 @media (max-width: 600px) {
   .promotions-grid.first-span > .promo-card:first-child .promo-title {
-    font-size: clamp(1.65rem, 6.8vw, 2.1rem);
+    font-size: clamp(1.6rem, 6.5vw, 2rem);
   }
   .promotions-grid.first-span > .promo-card:first-child .promo-body {
     padding-left: clamp(1rem, 6vw, 2rem);
@@ -310,13 +311,11 @@ footer.site-footer .fa { width: 18px; height: 18px; }
 
 /* Larger, bolder title when the first card spans full width */
 .promotions-grid.first-span > .promo-card:first-child .promo-title {
-  font-size: clamp(2rem, 5.5vw, 3.5rem);
+  font-size: clamp(1.9rem, 5.2vw, 3.3rem);
   letter-spacing: -0.025em;
   font-weight: 700; /* thinner than ultra-bold */
 }
-.promotions-grid.first-span > .promo-card:first-child .promo-body {
-  bottom: 10px;
-}
+/* Body flows normally now; no absolute offset needed */
 
 /* Ensure first full-width promo has enough height for larger titles */
 .promotions-grid.first-span > .promo-card:first-child {
@@ -330,9 +329,13 @@ footer.site-footer .fa { width: 18px; height: 18px; }
   overflow: hidden; 
   box-shadow: var(--shadow-sm);
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  /* Let content define height while grid equalizes rows */
+  min-height: clamp(72px, 7vw, 120px);
+  display: flex;
+  flex-direction: column;
 }
 .promo-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: #d1d5db; }
-.promo-card { position: relative; min-height: clamp(90px, 9vw, 140px); }
+.promo-card { position: relative; }
 .promo-media { 
   position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; 
   background: var(--color-surface);
@@ -365,24 +368,21 @@ footer.site-footer .fa { width: 18px; height: 18px; }
 /* image element no longer required for background; retain selector for safety if used elsewhere */
 .promo-media img { display: none; }
 .promo-body {
-  position: absolute; /* allow vertical centering within banner */
-  top: 50%;
-  transform: translateY(-50%);
-  left: 0;
-  right: 0;
-  padding: .5rem .7rem .6rem;
+  position: relative; /* normal document flow so height adapts to text */
+  padding: .55rem .7rem .6rem;
   z-index: 4; 
   isolation: isolate;
 }
 /* Indent promo titles a bit from the left, consistent with the hero-like first tile (smaller offset) */
 .promotions-grid .promo-card .promo-body {
-  padding-left: clamp(1rem, 8vw, 6rem);
-  padding-right: clamp(.75rem, 4vw, 3rem);
+  /* Slightly reduce side padding to give titles more room */
+  padding-left: clamp(.85rem, 6vw, 4.5rem);
+  padding-right: clamp(.6rem, 3.5vw, 2.5rem);
 }
 @media (max-width: 600px) {
   .promotions-grid .promo-card .promo-body {
-    padding-left: clamp(1rem, 6vw, 2rem);
-    padding-right: 1rem;
+    padding-left: clamp(.75rem, 5vw, 1.5rem);
+    padding-right: .85rem;
   }
 }
 .promo-card .promo-title {
@@ -397,11 +397,14 @@ footer.site-footer .fa { width: 18px; height: 18px; }
   font-weight: 800; /* bold heading */
   /* Make titles dominate the promo tile but avoid clipping on mobile */
   font-size: clamp(1.75rem, 5.2vw, 3.1rem);
-  line-height: 1.1;
+  line-height: 1.08;
   letter-spacing: -0.025em;
 
   transition: transform .25s ease, opacity .25s ease, filter .25s ease;
   will-change: transform, opacity;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
 }
 
 /* Extra specificity to beat any inherited link/text color on home grid */
@@ -470,7 +473,7 @@ footer.site-footer .fa { width: 18px; height: 18px; }
   /* text-shadow:
     0 2px 8px rgba(0,0,0,.6),
     0 1px 3px rgba(0,0,0,.85); */
-  font-size: clamp(.85rem, 1.6vw, 1rem);
+  font-size: clamp(.8rem, 1.5vw, .95rem);
   
   font-weight: 600;
   line-height: 1.35;
@@ -481,11 +484,11 @@ footer.site-footer .fa { width: 18px; height: 18px; }
 
 /* Smaller titles for promos after the first, to fit within cards (especially on mobile) */
 .promotions-grid .promo-card:not(:first-child) .promo-title {
-  font-size: clamp(1.25rem, 4.3vw, 2.1rem);
+  font-size: clamp(1.22rem, 4.1vw, 2rem);
 }
 @media (max-width: 600px) {
   .promotions-grid .promo-card:not(:first-child) .promo-title {
-    font-size: clamp(1.05rem, 4.8vw, 1.5rem);
+    font-size: clamp(1.02rem, 4.6vw, 1.45rem);
   }
 }
 
