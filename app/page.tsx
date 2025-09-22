@@ -131,19 +131,23 @@ export default async function HomePage({
           )}
         </div>
         {/* Pagination Controls */}
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '1.25rem', alignItems: 'center' }}>
-          {currentPage > 1 && (
-            <Link href={`/?page=${currentPage - 1}`} className="button" prefetch={false}>
-              ← Previous
-            </Link>
-          )}
-          <span className="muted" style={{ alignSelf: 'center', padding: '0 0.5rem' }}>Page {currentPage}</span>
-          {hasNext && (
-            <Link href={`/?page=${currentPage + 1}`} className="button" prefetch={false}>
-              Next →
-            </Link>
-          )}
-          <Link href="/catalog" className="link" style={{ marginLeft: '0.75rem' }}>View all</Link>
+        <div className="pagination-controls">
+          <div className="pagination-row">
+            {currentPage > 1 && (
+              <Link href={`/?page=${currentPage - 1}`} className="button" prefetch={false}>
+                ← Previous
+              </Link>
+            )}
+            <span className="muted" style={{ alignSelf: 'center', padding: '0 0.5rem' }}>Page {currentPage}</span>
+            {hasNext && (
+              <Link href={`/?page=${currentPage + 1}`} className="button" prefetch={false}>
+                Next →
+              </Link>
+            )}
+          </div>
+          <div className="pagination-row">
+            <Link href="/catalog" className="link">View all</Link>
+          </div>
         </div>
       </section>
     </>
